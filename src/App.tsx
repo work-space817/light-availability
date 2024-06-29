@@ -1,24 +1,41 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import "./App.css";
+import getState from "./api/firebase/getState";
 
 function App() {
+  const [data, setData] = useState<any>();
+  const [count, setCount] = useState(10);
+
+  useEffect(() => {
+    fetchData();
+    const timer = setInterval(() => {
+      setCount((prevCount) => {
+        if (prevCount === 1) {
+          fetchData();
+          return 10;
+        }
+        return prevCount - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const fetchData = async () => {
+    const time = await getState();
+    console.log("time: ", time?.time);
+    setData(time?.time);
+  };
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="layout">
+      <div className="">
+        <p>Time to next check out: {count}</p>
+        <p>Last checked time: {data}</p>
+
+        <button className="btn" onClick={fetchData}>
+          Force reload
+        </button>
+      </div>
     </div>
   );
 }
